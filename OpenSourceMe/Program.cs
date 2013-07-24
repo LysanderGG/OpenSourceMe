@@ -15,15 +15,26 @@ namespace OpenSourceMe
             if(args.Length != 4) {
                 Console.WriteLine("Incorrect Command Line.");
                 Console.WriteLine(s_helpText);
+                return;
             }
 
-            String CSVFilePath      = args[0];
-            String rootPathFrom     = args[1];
-            String rootPathTo       = args[2];
-            String rootPathHBFiles  = args[3];
-            OpenSourcer os = new OpenSourcer(CSVFilePath, rootPathFrom, rootPathTo, rootPathHBFiles);
+            try {
+                String CSVFilePath      = args[0];
+                String rootPathFrom     = args[1];
+                String rootPathTo       = args[2];
+                String rootPathHBFiles  = args[3];
+                OpenSourcer os = new OpenSourcer(CSVFilePath, rootPathFrom, rootPathTo, rootPathHBFiles);
             
-            while(os.ProcessNext());
+                while(os.ProcessNext());
+            } catch(Exception e) {
+                Console.WriteLine("## Exception ##");
+                Console.WriteLine("#");
+                Console.WriteLine("# Message     : " + e.Message);
+                Console.WriteLine("#");
+                Console.WriteLine("# Stack Trace : " + e.StackTrace);
+                Console.WriteLine("#");
+                Console.WriteLine("## End Of Exception ##");
+            }
         }
     }
 }
