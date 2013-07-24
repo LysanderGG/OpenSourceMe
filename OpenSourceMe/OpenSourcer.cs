@@ -17,19 +17,19 @@ namespace OpenSourceMe
         private const String     CSV_VALUE_HEADER    = "Header";
         private const String     CSV_VALUE_SRC_PATH  = "Path";
 
-        private const String     DEFAULT_HEADERBATCHER_ROOTPATH  = "D:/KLab/Tests/HeaderBatcherFiles/";
-        private const String     DEFAULT_NEW_HEADER_PATH         = DEFAULT_HEADERBATCHER_ROOTPATH + "newHeader.txt";
-        private static readonly String[]   DEFAULT_OLD_HEADERS_PATHS       = { 
+        private const String     DEFAULT_NEW_HEADER_PATH         = "newHeader.txt";
+        private static readonly String[]   DEFAULT_OLD_HEADERS_PATHS    = { 
                                                                               DEFAULT_NEW_HEADER_PATH
                                                                           };
         private static readonly String[]   DEFAULT_HEADERS_TO_IGNORE       = null;
-        private const String     DEFAULT_WHITELIST_PATH          = DEFAULT_HEADERBATCHER_ROOTPATH + "whiteList.txt";
-        private const String     DEFAULT_BLACKLIST_PATH          = DEFAULT_HEADERBATCHER_ROOTPATH + "blackList.txt";
+        private const String     DEFAULT_BLACKLIST_PATH          = "blackList.txt";
+        private const String     DEFAULT_WHITELIST_PATH          = "whiteList.txt";
 
         
         private CSVFileManager  m_CSVFileManager;
         private String          m_rootPathFrom;
         private String          m_rootPathTo;
+        private String          m_rootPathHBFiles;
         private int             m_copyIndex;
         private int             m_headerIndex;
         private int             m_srcPathIndex;
@@ -37,15 +37,15 @@ namespace OpenSourceMe
 
 
         
-        public OpenSourcer(String _CSVFilePath, String _rootPathFrom, String _rootPathTo) {
+        public OpenSourcer(String _CSVFilePath, String _rootPathFrom, String _rootPathTo, String _rootPathHBFiles) {
             m_CSVFileManager    = new CSVFileManager(_CSVFilePath);
             m_headerBatchersDic = new Dictionary<string,FileBatcher>();
-            m_headerBatchersDic.Add(DEFAULT_NEW_HEADER_PATH, 
-                                    new HeaderBatcher.FileBatcher( DEFAULT_NEW_HEADER_PATH, DEFAULT_OLD_HEADERS_PATHS, DEFAULT_HEADERS_TO_IGNORE, 
-                                                                   DEFAULT_BLACKLIST_PATH, DEFAULT_WHITELIST_PATH)
-                                   );
+
             m_rootPathFrom = _rootPathFrom;
             m_rootPathTo   = _rootPathTo;
+            m_rootPathHBFiles = _rootPathHBFiles;
+
+            AddToHBDictionary(DEFAULT_NEW_HEADER_PATH, DEFAULT_OLD_HEADERS_PATHS, DEFAULT_HEADERS_TO_IGNORE, DEFAULT_BLACKLIST_PATH, DEFAULT_WHITELIST_PATH);
 
             // Indexes setting
             String[] header = m_CSVFileManager.GetHeader();
@@ -117,7 +117,7 @@ namespace OpenSourceMe
             String headerValue   = _line[m_headerIndex];
             String headerToApply = null;
 
-            if(!hasToCopyFile(_line)) {
+            if(!HasToCopyFile(_line)) {
                 return null;
             }
             // The Header Value can also be a path to a specific header file.
@@ -188,17 +188,15 @@ namespace OpenSourceMe
             
             // Is there already a HeaderBatcher for this specific header ?
             if(!m_headerBatchersDic.ContainsKey(header)) {
-                m_headerBatchersDic.Add(header, 
-                                        new FileBatcher(header, DEFAULT_OLD_HEADERS_PATHS, DEFAULT_HEADERS_TO_IGNORE,
-                                                        DEFAULT_BLACKLIST_PATH, DEFAULT_WHITELIST_PATH)
-                                        );
+                AddToHBDictionary(header, DEFAULT_OLD_HEADERS_PATHS, DEFAULT_HEADERS_TO_IGNORE,
+                                  DEFAULT_BLACKLIST_PATH, DEFAULT_WHITELIST_PATH);
             }
 
             return m_headerBatchersDic[header].BatchOne(GetDstPath(_line));
         }
 
         private bool CopyFile(String[] _line) {
-            if(!hasToCopyFile(_line)) {
+            if(!HasToCopyFile(_line)) {
                 return false;
             }
             
@@ -213,7 +211,7 @@ namespace OpenSourceMe
             return true;
         }
 
-        private bool hasToCopyFile(String[] _line) {
+        private bool HasToCopyFile(String[] _line) {
             bool res = true;
             try {
                 res = GetBoolValueOfString(_line[m_copyIndex]);
@@ -224,5 +222,43 @@ namespace OpenSourceMe
             return res;
         }
 
+        /// <summary>
+        /// Converts relative paths to absolute ones.
+        /// </summary>
+        /// <param name="_newHeaderPath"></param>
+        /// <param name="_oldHeadersPaths"></param>
+        /// <param name="_headersToIgnorePaths"></param>
+        /// <param name="_blackListPath"></param>
+        /// <param name="_whiteListPath"></param>
+        private void AddToHBDictionary(String _newHeaderPath, String[] _oldHeadersPaths, String[] _headersToIgnorePaths, String _blackListPath, String _whiteListPath) {
+            String[] oldHeaders = null;
+            String[] headersToIgnore = null;
+
+            if(_oldHeadersPaths != null) {
+                oldHeaders = new String[_oldHeadersPaths.Length];
+                for(int i = 0; i < _oldHeadersPaths.Length; ++i) {
+                    if(_oldHeadersPaths[i] != null) {
+                        oldHeaders[i] = m_rootPathHBFiles + _oldHeadersPaths[i];
+                    }
+                }
+            }
+
+            if(_headersToIgnorePaths != null) {
+                headersToIgnore = new String[_headersToIgnorePaths.Length];
+                for(int i = 0; i < _headersToIgnorePaths.Length; ++i) {
+                    if(_headersToIgnorePaths[i] != null) {
+                        headersToIgnore[i] = m_rootPathHBFiles + _headersToIgnorePaths[i];
+                    }
+                }
+            }
+
+            m_headerBatchersDic.Add(_newHeaderPath, 
+                                    new HeaderBatcher.FileBatcher(  m_rootPathHBFiles + _newHeaderPath, 
+                                                                    oldHeaders, 
+                                                                    headersToIgnore, 
+                                                                    m_rootPathHBFiles + _blackListPath, 
+                                                                    m_rootPathHBFiles + _whiteListPath)
+                                   );
+        }
     }
 }

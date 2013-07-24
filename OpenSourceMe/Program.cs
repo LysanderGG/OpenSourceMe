@@ -13,7 +13,8 @@ namespace OpenSourceMe
             String CSVFilePath  = "D:/KLab/Tests/FilesList.csv";
             String rootFilePath = "D:/KLab/Tests/playgroundTestFrom/Engine/";
             String rootPathTo   = "D:/KLab/Tests/playgroundTestTo/Engine/";
-            OpenSourcer os = new OpenSourcer(CSVFilePath, rootFilePath, rootPathTo);
+            String rootPathHBFiles = "D:/KLab/Tests/HeaderBatcherFiles/";
+            OpenSourcer os = new OpenSourcer(CSVFilePath, rootFilePath, rootPathTo, rootPathHBFiles);
             
             while(os.ProcessNext());
         }
