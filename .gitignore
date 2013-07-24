@@ -1,0 +1,4 @@
+OpenSourceMe/bin/*
+OpenSourceMe/obj/*
+
+*.suo
