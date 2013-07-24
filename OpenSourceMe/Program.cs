@@ -9,12 +9,19 @@ namespace OpenSourceMe
 {
     class Program
     {
+        static String s_helpText = "OpenSourceMe [CSV File Path] [Root Path From] [Root Path To] [Root Path HeaderBatcher Files]";
+
         static void Main(string[] args) {
-            String CSVFilePath  = "D:/KLab/Tests/FilesList.csv";
-            String rootFilePath = "D:/KLab/Tests/playgroundTestFrom/Engine/";
-            String rootPathTo   = "D:/KLab/Tests/playgroundTestTo/Engine/";
-            String rootPathHBFiles = "D:/KLab/Tests/HeaderBatcherFiles/";
-            OpenSourcer os = new OpenSourcer(CSVFilePath, rootFilePath, rootPathTo, rootPathHBFiles);
+            if(args.Length != 4) {
+                Console.WriteLine("Incorrect Command Line.");
+                Console.WriteLine(s_helpText);
+            }
+
+            String CSVFilePath      = args[0];
+            String rootPathFrom     = args[1];
+            String rootPathTo       = args[2];
+            String rootPathHBFiles  = args[3];
+            OpenSourcer os = new OpenSourcer(CSVFilePath, rootPathFrom, rootPathTo, rootPathHBFiles);
             
             while(os.ProcessNext());
         }
