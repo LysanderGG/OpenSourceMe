@@ -1,0 +1,3 @@
+[submodule "HeaderBatcher"]
+	path = HeaderBatcher
+	url = git@github.com:LysanderGG/HeaderBatcher.git
