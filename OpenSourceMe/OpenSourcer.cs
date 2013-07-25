@@ -8,15 +8,29 @@ using HeaderBatcher;
 
 namespace OpenSourceMe
 {
+    /// <summary>
+    /// Main class of the program.
+    /// It is in charge of coopying the project file from a Source Folder
+    /// to a Destination Folder and had or not a header to these files.
+    /// The files to copy, the destination and the order to add or not a header
+    /// is notified in a CSV file.
+    /// </summary>
     class OpenSourcer
     {
+        //
+        // Constantes
+        //
+
+        // True/False Text Values
         private static readonly String[]   TRUE_VALUES         = { "true", "yes", "1" };
         private static readonly String[]   FALSE_VALUES        = { "false", "no", "0", "" };
 
+        // CSV Header Values
         private const String     CSV_VALUE_COPY      = "Copy";
         private const String     CSV_VALUE_HEADER    = "Header";
         private const String     CSV_VALUE_SRC_PATH  = "Path";
 
+        // Default Paths for HeaderBatcher
         private const String     DEFAULT_NEW_HEADER_PATH         = "newHeader.txt";
         private static readonly String[]   DEFAULT_OLD_HEADERS_PATHS    = { 
                                                                               DEFAULT_NEW_HEADER_PATH
@@ -25,7 +39,9 @@ namespace OpenSourceMe
         private const String     DEFAULT_BLACKLIST_PATH          = "blackList.txt";
         private const String     DEFAULT_WHITELIST_PATH          = "whiteList.txt";
 
-        
+        //
+        // Members
+        //
         private CSVFileManager  m_CSVFileManager;
         private String          m_rootPathFrom;
         private String          m_rootPathTo;
@@ -35,15 +51,20 @@ namespace OpenSourceMe
         private int             m_srcPathIndex;
         private Dictionary<String, HeaderBatcher.FileBatcher> m_headerBatchersDic;
 
-
-        
+        /// <summary>
+        /// OpenSourcer Constructor
+        /// </summary>
+        /// <param name="_CSVFilePath">Path to the CSV File that contains the Project information.</param>
+        /// <param name="_rootPathFrom">Root Path of the Source Project.</param>
+        /// <param name="_rootPathTo">Root Path of the Destination Project.</param>
+        /// <param name="_rootPathHBFiles">Root Path of the HeaderBatcher configuration files.</param>
         public OpenSourcer(String _CSVFilePath, String _rootPathFrom, String _rootPathTo, String _rootPathHBFiles) {
             m_CSVFileManager    = new CSVFileManager(_CSVFilePath);
             m_headerBatchersDic = new Dictionary<string,FileBatcher>();
 
-            m_rootPathFrom = _rootPathFrom;
-            m_rootPathTo   = _rootPathTo;
-            m_rootPathHBFiles = _rootPathHBFiles;
+            m_rootPathFrom      = _rootPathFrom;
+            m_rootPathTo        = _rootPathTo;
+            m_rootPathHBFiles   = _rootPathHBFiles;
 
             AddToHBDictionary(DEFAULT_NEW_HEADER_PATH, DEFAULT_OLD_HEADERS_PATHS, DEFAULT_HEADERS_TO_IGNORE, DEFAULT_BLACKLIST_PATH, DEFAULT_WHITELIST_PATH);
 
@@ -73,7 +94,7 @@ namespace OpenSourceMe
         /// <summary>
         /// Processes the next item.
         /// </summary>
-        /// <returns>true if an item has been processed. Flase if no more items.</returns>
+        /// <returns>True if an item has been processed. False if no more items.</returns>
         public bool ProcessNext() {
             // Is there a next line ?
             String[] line = m_CSVFileManager.ReadLine();
@@ -92,6 +113,12 @@ namespace OpenSourceMe
             return true;
         }
 
+        /// <summary>
+        /// Translate a String value into boolean.
+        /// Text values corresponding to True/False are defined by TRUE_VALUES and FALSE_VALUES.
+        /// </summary>
+        /// <param name="_str">String to convert.</param>
+        /// <returns>The associated boolean value.</returns>
         private static bool GetBoolValueOfString(string _str) {
             if(_str == null || FALSE_VALUES.Contains(_str.ToLower())) {
                 return false;
@@ -114,6 +141,11 @@ namespace OpenSourceMe
             throw new ArgumentException(errorMessage);
         }
 
+        /// <summary>
+        /// Returns the header relative path to apply on a file.
+        /// </summary>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
+        /// <returns>The header relative path.</returns>
         private String GetHeaderToApply(String[] _line) {
             String headerValue   = _line[m_headerIndex];
             String headerToApply = null;
@@ -138,10 +170,10 @@ namespace OpenSourceMe
         }
 
         /// <summary>
-        /// 
+        /// Returns the Absolute Destination Path.
         /// </summary>
-        /// <param name="_line"></param>
-        /// <returns>Absolute Dst Path</returns>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
+        /// <returns>Absolute Destination Path</returns>
         private String GetDstPath(String[] _line) {
             String CopyValue    = _line[m_copyIndex];
             String dstPath      = null;
@@ -165,6 +197,11 @@ namespace OpenSourceMe
             return m_rootPathTo + dstPath;
         }
 
+        /// <summary>
+        /// Returns the Absolute Source Path.
+        /// </summary>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
+        /// <returns>Absolute Source Path</returns>
         private String GetSrcPath(String[] _line) {
             if(_line[m_srcPathIndex].StartsWith("./")) {
                 return m_rootPathFrom + _line[m_srcPathIndex].Remove(0, 2);
@@ -174,11 +211,10 @@ namespace OpenSourceMe
         }
 
         /// <summary>
+        /// Applies the required header on the destination file.
         /// The destination file must have been created previously.
         /// </summary>
-        /// <param name="_path"></param>
-        /// <param name="_headerToApply"></param>
-        /// <param name="_header"></param>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
         /// <returns>True if a header had been added to the file. Flase otherwise.</returns>
         private bool ApplyHeader(String[] _line) {
             String header = GetHeaderToApply(_line);
@@ -196,6 +232,12 @@ namespace OpenSourceMe
             return m_headerBatchersDic[header].BatchOne(GetDstPath(_line));
         }
 
+        /// <summary>
+        /// Copies the file from the source folder to the destination one,
+        /// if the CSV file requires it to.
+        /// </summary>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
+        /// <returns>True if the file had been copied. False otherwise.</returns>
         private bool CopyFile(String[] _line) {
             if(!HasToCopyFile(_line)) {
                 return false;
@@ -212,6 +254,11 @@ namespace OpenSourceMe
             return true;
         }
 
+        /// <summary>
+        /// Tells if a file has to be copied or not.
+        /// </summary>
+        /// <param name="_line">CSV Line corresponding to the file.</param>
+        /// <returns>True if the file has to be copied. False otherwise.</returns>
         private bool HasToCopyFile(String[] _line) {
             bool res = true;
             try {
