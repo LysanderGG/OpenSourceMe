@@ -11,7 +11,7 @@ namespace OpenSourceMe
     class OpenSourcer
     {
         private static readonly String[]   TRUE_VALUES         = { "true", "yes", "1" };
-        private static readonly String[]   FALSE_VALUES        = { "false", "no", "0", null };
+        private static readonly String[]   FALSE_VALUES        = { "false", "no", "0", "" };
 
         private const String     CSV_VALUE_COPY      = "Copy";
         private const String     CSV_VALUE_HEADER    = "Header";
@@ -93,12 +93,13 @@ namespace OpenSourceMe
         }
 
         private static bool GetBoolValueOfString(string _str) {
-            if(TRUE_VALUES.Contains(_str)) {
-                return true;
-            } 
-            if(FALSE_VALUES.Contains(_str)) {
+            if(_str == null || FALSE_VALUES.Contains(_str.ToLower())) {
                 return false;
             }
+            if(TRUE_VALUES.Contains(_str.ToLower())) {
+                return true;
+            }
+
             String errorMessage = "Invalid value : \"" + _str + "\" given.\n";
             errorMessage += "For a True value, use one of the following word : ";
             foreach(string s in TRUE_VALUES) {
