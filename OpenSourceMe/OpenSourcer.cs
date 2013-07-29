@@ -87,6 +87,7 @@ namespace OpenSourceMe
                 if(m_srcPathIndex == -1) {
                     errorMessage += "\"" + CSV_VALUE_SRC_PATH + "\" is missing in the CSV header.\n";
                 }
+                errorMessage += "The CSV header (first line) must contain the following values : \"" + CSV_VALUE_COPY + "\", \"" + CSV_VALUE_HEADER + "\", \"" + CSV_VALUE_SRC_PATH + "\" in any order.\n";
                 throw new Exception(errorMessage);
             }
         }
@@ -203,11 +204,18 @@ namespace OpenSourceMe
         /// <param name="_line">CSV Line corresponding to the file.</param>
         /// <returns>Absolute Source Path</returns>
         private String GetSrcPath(String[] _line) {
+            String srcPath;
             if(_line[m_srcPathIndex].StartsWith("./")) {
-                return m_rootPathFrom + _line[m_srcPathIndex].Remove(0, 2);
+                srcPath = _line[m_srcPathIndex].Remove(0, 2);
+            } else {
+                srcPath = _line[m_srcPathIndex];
             }
 
-            return m_rootPathFrom + _line[m_srcPathIndex];
+            if(!File.Exists(m_rootPathFrom + srcPath)) {
+                throw new Exception("The Path \""+ srcPath + "\" does not refer to an existing file.\nIf the file does not exist anymore or if it had been moved, please update the CSV File.\n");
+            }
+
+            return m_rootPathFrom + srcPath;
         }
 
         /// <summary>
