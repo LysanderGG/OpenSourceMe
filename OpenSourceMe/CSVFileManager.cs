@@ -22,7 +22,11 @@ namespace OpenSourceMe
             m_header = lines[0].Split(s_separators);
 
             for(int i = 1; i < lines.Length; ++i) {
-                m_values[i-1] = lines[i].Split(s_separators);
+                m_values[i - 1] = new String[m_header.Length];
+                String[] tmp = lines[i].Split(s_separators);
+                for(int j = 0; j < tmp.Length; ++j) {
+                    m_values[i - 1][j] = tmp[j];
+                }
             }
         }
 
