@@ -99,9 +99,16 @@ namespace OpenSourceMe
         public bool ProcessNext() {
             // Is there a next line ?
             String[] line = m_CSVFileManager.ReadLine();
+            // If the Path is empty or if it starts with // we do not proceed this line
+            while(line != null && !HasToProceed(line)) {
+                line = m_CSVFileManager.ReadLine();
+            }
+
             if(line == null) {
                 return false;
             }
+
+            
 
             if(CopyFile(line)) {
                 Console.WriteLine(line[m_srcPathIndex] + " has been copied to " + GetDstPath(line));
@@ -212,7 +219,7 @@ namespace OpenSourceMe
             }
 
             if(!File.Exists(m_rootPathFrom + srcPath)) {
-                throw new Exception("The Path \""+ srcPath + "\" does not refer to an existing file.\nIf the file does not exist anymore or if it had been moved, please update the CSV File.\n");
+                throw new Exception("The Path \""+ _line[m_srcPathIndex] + "\" refering to the complete path : \"" + m_rootPathFrom + srcPath + "\" does not refer to an existing file.\nIf the file does not exist anymore or if it had been moved, please update the CSV File.\n");
             }
 
             return m_rootPathFrom + srcPath;
@@ -276,6 +283,19 @@ namespace OpenSourceMe
                 // means res = true;
             }
             return res;
+        }
+
+        private bool HasToProceed(String[] _line) {
+            String path = _line[m_srcPathIndex];
+            if(path == null) {
+                return true;
+            }
+
+            if(path == String.Empty || path.StartsWith("//")) {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
