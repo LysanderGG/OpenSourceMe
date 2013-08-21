@@ -88,7 +88,7 @@ namespace OpenSourceMe
                     errorMessage += "\"" + CSV_VALUE_SRC_PATH + "\" is missing in the CSV header.\n";
                 }
                 errorMessage += "The CSV header (first line) must contain the following values : \"" + CSV_VALUE_COPY + "\", \"" + CSV_VALUE_HEADER + "\", \"" + CSV_VALUE_SRC_PATH + "\" in any order.\n";
-                throw new Exception(errorMessage);
+                throw new OSMCriticalException(errorMessage);
             }
         }
 
@@ -166,11 +166,11 @@ namespace OpenSourceMe
                 if(GetBoolValueOfString(headerValue)) {
                     headerToApply = DEFAULT_NEW_HEADER_PATH;
                 }
-            } catch(Exception e) {
+            } catch(ArgumentException e) {
                 if(File.Exists(headerValue)) {
                     headerToApply = headerValue;
                 } else {
-                    throw new Exception(e.Message + "If you wanted to specify a Path to a Header, the given path is incorrect.\n");
+                    throw new OSMException(e.Message + "If you wanted to specify a Path to a Header, the given path is incorrect.\n");
                 }
             }
 
@@ -219,7 +219,7 @@ namespace OpenSourceMe
             }
 
             if(!File.Exists(m_rootPathFrom + srcPath)) {
-                throw new Exception("The Path \""+ _line[m_srcPathIndex] + "\" refering to the complete path : \"" + m_rootPathFrom + srcPath + "\" does not refer to an existing file.\nIf the file does not exist anymore or if it had been moved, please update the CSV File.\n");
+                throw new OSMException("The Path \""+ _line[m_srcPathIndex] + "\" refering to the complete path : \"" + m_rootPathFrom + srcPath + "\" does not refer to an existing file.\nIf the file does not exist anymore or if it had been moved, please update the CSV File.\n");
             }
 
             return m_rootPathFrom + srcPath;
