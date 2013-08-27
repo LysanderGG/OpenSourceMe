@@ -23,27 +23,21 @@ namespace OpenSourceMe
 
             for(int i = 1; i < lines.Length; ++i) {
                 String[] tmp = null;
-                try
-                {
+                try {
                     m_values[i - 1] = new String[m_header.Length];
                     tmp = lines[i].Split(s_separators);
-                    if (tmp[0].ToString().StartsWith("//"))
-                    {
-                        for (int j = 0; j < m_header.Length; ++j)
-                        {
+                    // Comment-style line (can contain separators chars).
+                    if(tmp[0].ToString().StartsWith("//")) {
+                        for(int j = 0; j < m_header.Length; ++j) {
                             m_values[i - 1][j] = null;
                         }
-                    }
-                    else
-                    {
-                        for (int j = 0; j < tmp.Length; ++j)
-                        {
+                    } else {
+                        for(int j = 0; j < tmp.Length; ++j) {
                             m_values[i - 1][j] = tmp[j];
                         }
                     }
                 }
-                catch (Exception e)
-                {
+                catch(Exception e) {
                     throw new Exception("Invalid CSV file format at line " + i);
                 }
             }
